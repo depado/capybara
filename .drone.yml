@@ -15,7 +15,7 @@ steps:
       - name: deps
         path: /go
     commands:
-      - make
+      - make build-noproto
 
   - name: linter
     image: golang:latest
