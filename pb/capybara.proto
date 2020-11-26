@@ -1,0 +1,61 @@
+syntax = "proto3";
+package pb;
+
+option go_package = ".;pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+message LockResponse {
+  bool acquired = 1;
+  string owner = 2;
+  google.protobuf.Timestamp created_at = 3;
+  google.protobuf.Timestamp valid_until = 4;
+}
+
+message LockRequest {
+  string key = 1;
+  string who = 2;
+  google.protobuf.Duration TTL = 3;
+}
+
+message ReleaseRequest {
+  string key = 1;
+  string who = 2;
+}
+
+message ReleaseResponse {}
+
+message PutRequest {
+  repeated string buckets = 1;
+  string key = 2;
+  bytes value = 3;
+}
+
+message PutResponse {}
+
+message DeleteRequest {
+  repeated string buckets = 1;
+  string key = 2;
+}
+
+message DeleteResponse {}
+
+message GetRequest {
+  repeated string buckets = 1;
+  string key = 2;
+}
+
+message GetResponse { bytes value = 1; }
+
+service Capybara {
+  // Acquires a lock
+  rpc ClaimLock(LockRequest) returns(LockResponse) {}
+  // Release a lock
+  rpc ReleaseLock(ReleaseRequest) returns(ReleaseResponse) {}
+
+  // CRUD operations
+  rpc Put(PutRequest) returns(PutResponse) {}
+  rpc Delete(DeleteRequest) returns(DeleteResponse) {}
+  rpc Get(GetRequest) returns(GetResponse) {}
+}

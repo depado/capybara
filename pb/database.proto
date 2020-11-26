@@ -1,0 +1,12 @@
+syntax="proto3";
+package pb;
+
+option go_package = ".;pb";
+
+import "google/protobuf/timestamp.proto";
+
+message Lock {
+    string owner = 1;
+    google.protobuf.Timestamp created_at = 2;
+    google.protobuf.Timestamp valid_until = 3;
+}
