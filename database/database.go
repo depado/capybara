@@ -14,9 +14,11 @@ import (
 )
 
 const (
+	// LocksBucket is the default bucket used to store the locks
 	LocksBucket = "_locks"
 )
 
+// ErrLocksBucketNotFound is the error returned when the bucket isn't found
 var ErrLocksBucketNotFound = errors.New("locks bucket not found")
 
 type CapybaraDB struct {
@@ -25,6 +27,7 @@ type CapybaraDB struct {
 	locksm sync.RWMutex
 }
 
+// NewCapybaraDB creates a new instance of CapybaraDB
 func NewCapybaraDB(lc fx.Lifecycle, conf *cmd.Conf, l zerolog.Logger) *CapybaraDB {
 	log := l.With().Str("component", "database").Logger()
 

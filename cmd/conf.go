@@ -20,8 +20,15 @@ type LogConf struct {
 }
 
 type ServerConf struct {
-	Host string `mapstructure:"host"`
-	Port int    `mapstructure:"port"`
+	Host string    `mapstructure:"host"`
+	Port int       `mapstructure:"port"`
+	TLS  TLSConfig `mapstructure:"tls"`
+}
+
+type TLSConfig struct {
+	CertPath string `mapstructure:"cert_path"`
+	KeyPath  string `mapstructure:"key_path"`
+	Type     string `mapstructure:"tls"`
 }
 
 func (s ServerConf) ListenAddr() string {
@@ -45,29 +52,29 @@ type Conf struct {
 }
 
 // NewLogger will return a new logger
-func NewLogger(c *Conf) zerolog.Logger {
+func NewLogger(conf *Conf) zerolog.Logger {
 	// Level parsing
 	warns := []string{}
-	lvl, err := zerolog.ParseLevel(c.Log.Level)
+	lvl, err := zerolog.ParseLevel(conf.Log.Level)
 	if err != nil {
-		warns = append(warns, fmt.Sprintf("unrecognized log level '%s', fallback to 'info'", c.Log.Level))
+		warns = append(warns, fmt.Sprintf("unrecognized log level '%s', fallback to 'info'", conf.Log.Level))
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		zerolog.SetGlobalLevel(lvl)
 	}
 
 	// Type parsing
-	switch c.Log.Type {
+	switch conf.Log.Type {
 	case "console":
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	case "json":
 		break
 	default:
-		warns = append(warns, fmt.Sprintf("unrecognized log type '%s', fallback to 'json'", c.Log.Type))
+		warns = append(warns, fmt.Sprintf("unrecognized log type '%s', fallback to 'json'", conf.Log.Type))
 	}
 
 	// Caller
-	if c.Log.Caller {
+	if conf.Log.Caller {
 		log.Logger = log.With().Caller().Logger()
 	}
 

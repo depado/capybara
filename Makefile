@@ -4,8 +4,16 @@ export GO111MODULE=on
 export CGO_ENABLED=0
 export VERSION=$(shell git describe --abbrev=0 --tags 2> /dev/null || echo "0.1.0")
 export BUILD=$(shell git rev-parse HEAD 2> /dev/null || echo "undefined")
+export BUILDDATE=$(shell LANG=en_us_88591 date)
 BINARY=capybara
 LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X main.Build=$(BUILD) -s -w"
+LDFLAGS=-ldflags "-X 'github.com/Depado/capybara/cmd.Version=$(VERSION)' \
+		-X 'github.com/Depado/capybara/cmd.Build=$(BUILD)' \
+		-X 'github.com/Depado/capybara/cmd.Time=$(BUILDDATE)' -s -w"
+PACKEDFLAGS=-ldflags "-X 'github.com/Depado/capybara/cmd.Version=$(VERSION)' \
+		-X 'github.com/Depado/capybara/cmd.Build=$(BUILD)' \
+		-X 'github.com/Depado/capybara/cmd.Time=$(BUILDDATE)' \
+		-X 'github.com/Depado/capybara/cmd.Packer=upx --best --lzma' -s -w"
 
 .PHONY: help
 help:
@@ -19,9 +27,10 @@ build-noproto: ## Build without regenerating the go grpc bindings
 build: proto ## Build
 	go build $(LDFLAGS) -o $(BINARY) 
 
-.PHONY: compressed
-compressed: proto build
-	upx --brute $(BINARY)
+.PHONY: packed
+packed: proto ## Build a packed version
+	go build $(PACKEDFLAGS) -o $(BINARY)
+	upx --best --lzma $(BINARY)
 
 .PHONY: proto
 proto: ## Generate protobuf
@@ -30,9 +39,11 @@ proto: ## Generate protobuf
 
 .PHONY: docker
 docker: proto ## Build the docker image
-	docker build -t $(BINARY):latest -t $(BINARY):$(BUILD) \
-		--build-arg build=$(BUILD) --build-arg version=$(VERSION) \
-		-f Dockerfile .
+	docker build -t $(BINARY):latest -t $(BINARY):$(BUILD) -f Dockerfile .
+
+.PHONY: tmp
+tmp: ## Build and output the binary in /tmp
+	go build $(LDFLAGS) -o /tmp/$(BINARY)
 
 .PHONY: release
 release: ## Create a new release on Github

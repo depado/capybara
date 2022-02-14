@@ -23,6 +23,7 @@ func (cap *CapybaraServer) AuthInterceptor(ctx context.Context, req interface{},
 	if len(meta["token"]) != 1 {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
 	}
+
 	if meta["token"][0] != "valid-token" {
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
 	}

@@ -3,13 +3,23 @@ package database
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	bolt "go.etcd.io/bbolt"
 )
 
-var ErrBucketNotFound = errors.New("bucket not found")
-var ErrNoBucket = errors.New("no bucket provided")
+var (
+	// ErrBucketNotFound is returned when a specific bucket can't be found.
+	ErrBucketNotFound = errors.New("bucket not found")
+	// ErrNoBucket is returned when trying to put, get or delete a key with no
+	// bucket.
+	ErrNoBucket = errors.New("no bucket provided")
+	// ErrIncompatibleValue is returned when attempting to put/delete/get a key
+	// that is actually a bucket or a bucket that is actually a key. Basically
+	// that means the bucket path + key is invalid.
+	ErrIncompatibleValue = errors.New("incompatible value")
+)
 
 // TraverseCreate will traverse the whole bucket tree defined in the buckets
 // argument and will create the necessary buckets if they don't exist.
@@ -19,6 +29,7 @@ func TraverseCreate(t *bolt.Tx, buckets []string) (*bolt.Bucket, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	for _, bk := range buckets[1:] {
 		if b, err = b.CreateBucketIfNotExists([]byte(bk)); err != nil {
 			return nil, err
@@ -44,6 +55,9 @@ func Traverse(t *bolt.Tx, buckets []string) (*bolt.Bucket, error) {
 	return b, nil
 }
 
+// Put puts a value at the given key in the given bucket. The buckets will be
+// created on the fly if need be. An error will be returned if no bucket
+// is provided or if the path is invalid.
 func (cdb *CapybaraDB) Put(buckets []string, key string, value []byte) error {
 	start := time.Now()
 	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "put").Send()
@@ -59,7 +73,23 @@ func (cdb *CapybaraDB) Put(buckets []string, key string, value []byte) error {
 		return b.Put([]byte(key), value)
 	})
 
+	if errors.Is(err, bolt.ErrIncompatibleValue) {
+		return ErrIncompatibleValue
+	}
+
 	return err
+}
+
+// PutPath puts a value at the given path. The buckets will be
+// created on the fly if need be. An error will be returned if no bucket
+// is provided or if the path is invalid.
+func (cdb *CapybaraDB) PutPath(path, sep string, value []byte) error {
+	o := strings.Split(path, sep)
+	if len(o) < 2 {
+		return ErrNoBucket
+	}
+	buckets, key := o[:len(o)-1], o[len(o)-1]
+	return cdb.Put(buckets, key, value)
 }
 
 func (cdb *CapybaraDB) Delete(buckets []string, key string) error {
@@ -80,6 +110,15 @@ func (cdb *CapybaraDB) Delete(buckets []string, key string) error {
 	return err
 }
 
+func (cdb *CapybaraDB) DeletePath(path, sep string) error {
+	o := strings.Split(path, sep)
+	if len(o) < 2 {
+		return ErrNoBucket
+	}
+	buckets, key := o[:len(o)-1], o[len(o)-1]
+	return cdb.Delete(buckets, key)
+}
+
 func (cdb *CapybaraDB) Get(buckets []string, key string) ([]byte, error) {
 	start := time.Now()
 	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "get").Send()
@@ -94,6 +133,9 @@ func (cdb *CapybaraDB) Get(buckets []string, key string) ([]byte, error) {
 		if err != nil {
 			return err
 		}
+		if b.Bucket([]byte(key)) != nil {
+			return fmt.Errorf("key '%s' is a bucket: %w", key, ErrIncompatibleValue)
+		}
 		v := b.Get([]byte(key))
 		if v == nil {
 			return nil
@@ -104,4 +146,14 @@ func (cdb *CapybaraDB) Get(buckets []string, key string) ([]byte, error) {
 	})
 
 	return out, err
+}
+
+// GetPath will return the path
+func (cdb *CapybaraDB) GetPath(path, sep string) ([]byte, error) {
+	o := strings.Split(path, sep)
+	if len(o) < 2 {
+		return nil, ErrNoBucket
+	}
+	buckets, key := o[:len(o)-1], o[len(o)-1]
+	return cdb.Get(buckets, key)
 }

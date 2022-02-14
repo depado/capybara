@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Depado/capybara/pb"
 	bolt "go.etcd.io/bbolt"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/Depado/capybara/pb"
 )
 
 var ErrNotOwner = errors.New("not the lock owner")
