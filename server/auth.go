@@ -11,8 +11,8 @@ import (
 )
 
 // AuthInterceptor intercepts incoming grpc calls and will fetch the
-// authentication token in the context.
-// TODO: True check
+// authentication token in the context
+// TODO: True check.
 func (cap *CapybaraServer) AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	meta, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

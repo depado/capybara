@@ -12,7 +12,10 @@ import (
 	"github.com/Depado/capybara/pb"
 )
 
+// ErrNotOwner is the error returned when ownership of the lock doesn't match.
 var ErrNotOwner = errors.New("not the lock owner")
+
+// ErrLockNotFound is the error returned when a lock can't be found.
 var ErrLockNotFound = errors.New("lock not found")
 
 // ClaimLock can be used to claim a lock. If the lock is already owned, it will
@@ -21,6 +24,7 @@ var ErrLockNotFound = errors.New("lock not found")
 // is delayed.
 func (cdb *CapybaraDB) ClaimLock(key, owner string, pttl *time.Duration) (*pb.Lock, bool, error) {
 	start := time.Now()
+
 	var acquired bool
 
 	var ttl time.Duration
@@ -58,6 +62,7 @@ func (cdb *CapybaraDB) ClaimLock(key, owner string, pttl *time.Duration) (*pb.Lo
 					}
 					return b.Put([]byte(key), raw)
 				}
+				cdb.log.Debug().Str("owner", lock.Owner).Str("claimer", owner).Msg("lock is already claimed")
 				return nil
 			}
 			// Lock was expired, so we grant it
@@ -77,6 +82,7 @@ func (cdb *CapybaraDB) ClaimLock(key, owner string, pttl *time.Duration) (*pb.Lo
 	})
 
 	cdb.log.Debug().Str("took", time.Since(start).String()).Msg("lock claim completed")
+
 	return lock, acquired, err
 }
 
@@ -124,5 +130,6 @@ func (cdb *CapybaraDB) ReleaseLock(key, owner string) error {
 	})
 
 	cdb.log.Debug().Str("took", time.Since(start).String()).Msg("lock release completed")
+
 	return err
 }

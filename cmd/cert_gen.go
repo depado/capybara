@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	"net"
 	"os"
 	"path/filepath"
 	"time"
@@ -18,13 +19,14 @@ import (
 // GenerateServerCertEd will generate a new certificate and private key. This
 // function will return an error if a key or a cert already exist as to avoid
 // any data loss.
-func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
+func GenerateServerCertEd(c *Conf, log zerolog.Logger, local bool) error {
 	var caCertPath, caKeyPath = "certs/ca-cert.pem", "certs/ca-key.pem"
 
 	// Create directories if needed
 	if err := os.MkdirAll(filepath.Dir(c.Server.TLS.CertPath), os.ModePerm); err != nil {
 		return fmt.Errorf("create directory: %w", err)
 	}
+
 	if err := os.MkdirAll(filepath.Dir(c.Server.TLS.KeyPath), os.ModePerm); err != nil {
 		return fmt.Errorf("create directory: %w", err)
 	}
@@ -33,12 +35,15 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if _, err := os.Stat(c.Server.TLS.CertPath); err == nil {
 		return fmt.Errorf("file already exists: %s", c.Server.TLS.CertPath)
 	}
+
 	if _, err := os.Stat(c.Server.TLS.KeyPath); err == nil {
 		return fmt.Errorf("file already exists: %s", c.Server.TLS.KeyPath)
 	}
+
 	if _, err := os.Stat(caCertPath); err == nil {
 		return fmt.Errorf("file already exists: %s", caCertPath)
 	}
+
 	if _, err := os.Stat(caKeyPath); err == nil {
 		return fmt.Errorf("file already exists: %s", caKeyPath)
 	}
@@ -62,6 +67,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("generate key: %w", err)
 	}
+
 	log.Info().Msg("generated CA ed25519 private key")
 
 	// Generate a new x509 cert with the previously created CA and private key
@@ -69,6 +75,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("generate certificate: %w", err)
 	}
+
 	log.Info().Msg("generated CA certificate with ed25519 private key")
 
 	// Write the cert to the configured path
@@ -84,6 +91,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	}); err != nil {
 		return fmt.Errorf("pem encode cert: %w", err)
 	}
+
 	log.Info().Str("file", c.Server.TLS.CertPath).Msg("wrote certificate to file")
 
 	// Write the private key to the configured path
@@ -101,6 +109,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err = pem.Encode(fdk, &pem.Block{Type: "PRIVATE KEY", Bytes: b}); err != nil {
 		return fmt.Errorf("write file: %s: %w", caKeyPath, err)
 	}
+
 	log.Info().Str("file", caKeyPath).Msg("wrote private key to file")
 
 	// Generate server key and CSR
@@ -108,6 +117,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("generate ed25519 key: %w", err)
 	}
+
 	log.Info().Msg("generated server ed25519 private key")
 
 	template := x509.CertificateRequest{
@@ -121,10 +131,12 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("generate csr: %w", err)
 	}
+
 	csr, err := x509.ParseCertificateRequest(csrBytes)
 	if err != nil {
 		return fmt.Errorf("parse csr: %w", err)
 	}
+
 	log.Info().Msg("generated server csr")
 
 	clientCRTTemplate := x509.Certificate{
@@ -138,9 +150,16 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 		Issuer:       caCert.Subject,
 		Subject:      csr.Subject,
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(24 * time.Hour),
+		NotAfter:     time.Now().AddDate(10, 0, 0),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
+		ExtKeyUsage: []x509.ExtKeyUsage{
+			x509.ExtKeyUsageClientAuth,
+			x509.ExtKeyUsageServerAuth,
+		},
+	}
+
+	if local {
+		clientCRTTemplate.IPAddresses = []net.IP{net.ParseIP("127.0.0.1")}
 	}
 
 	// Sign CSR with CA private key
@@ -148,6 +167,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("create crt: %w", err)
 	}
+
 	log.Info().Msg("signed csr with CA ed25519 private key")
 
 	// Write cert on disk
@@ -161,6 +181,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	if err != nil {
 		return fmt.Errorf("pem encode crt: %w", err)
 	}
+
 	log.Info().Str("file", c.Server.TLS.CertPath).Msg("wrote server certificate to file")
 
 	// Write private key on disk
@@ -181,6 +202,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger) error {
 	}); err != nil {
 		return fmt.Errorf("pem encode key: %w", err)
 	}
+
 	log.Info().Str("file", c.Server.TLS.KeyPath).Msg("wrote server ed25519 private key to file")
 
 	return nil

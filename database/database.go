@@ -1,34 +1,40 @@
 package database
 
 import (
-	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
 	bolt "go.etcd.io/bbolt"
-	"go.uber.org/fx"
 
 	"github.com/Depado/capybara/cmd"
 )
 
 const (
-	// LocksBucket is the default bucket used to store the locks
+	// LocksBucket is the default bucket used to store the locks.
 	LocksBucket = "_locks"
 )
 
-// ErrLocksBucketNotFound is the error returned when the bucket isn't found
+// ErrLocksBucketNotFound is the error returned when the bucket isn't found.
 var ErrLocksBucketNotFound = errors.New("locks bucket not found")
 
+// CapybaraDB is the struct representing a capybara database.
 type CapybaraDB struct {
 	db     *bolt.DB
 	log    zerolog.Logger
 	locksm sync.RWMutex
 }
 
-// NewCapybaraDB creates a new instance of CapybaraDB
-func NewCapybaraDB(lc fx.Lifecycle, conf *cmd.Conf, l zerolog.Logger) *CapybaraDB {
+// Close will close the database.
+func (c *CapybaraDB) Close() error {
+	c.log.Debug().Msg("closing database")
+	return c.db.Close()
+}
+
+// NewCapybaraDB creates a new instance of CapybaraDB.
+func NewCapybaraDB(conf *cmd.Conf, l zerolog.Logger) (*CapybaraDB, error) {
 	log := l.With().Str("component", "database").Logger()
 
 	db, err := bolt.Open(conf.Database.Path, 0666, &bolt.Options{
@@ -37,6 +43,7 @@ func NewCapybaraDB(lc fx.Lifecycle, conf *cmd.Conf, l zerolog.Logger) *CapybaraD
 	if err != nil {
 		log.Fatal().Err(err).Msg("unable to open database")
 	}
+
 	log.Debug().Msg("initialized")
 
 	err = db.Update(func(t *bolt.Tx) error {
@@ -44,7 +51,7 @@ func NewCapybaraDB(lc fx.Lifecycle, conf *cmd.Conf, l zerolog.Logger) *CapybaraD
 		return err
 	})
 	if err != nil {
-		log.Fatal().Err(err).Msg("unable to initialize buckets")
+		return nil, fmt.Errorf("unable to initialize buckets: %w", err)
 	}
 
 	cdb := &CapybaraDB{
@@ -52,12 +59,5 @@ func NewCapybaraDB(lc fx.Lifecycle, conf *cmd.Conf, l zerolog.Logger) *CapybaraD
 		log: log,
 	}
 
-	lc.Append(fx.Hook{
-		OnStop: func(c context.Context) error {
-			cdb.log.Debug().Msg("closing database")
-			return cdb.db.Close()
-		},
-	})
-
-	return cdb
+	return cdb, nil
 }

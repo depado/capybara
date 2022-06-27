@@ -35,6 +35,7 @@ func main() {
 	// Claim a lock and log timings
 	for i := 0; i < 3; i++ {
 		start := time.Now()
+
 		pr, err := lc.ClaimLock(ctx, &pb.LockRequest{Key: lock, Who: whoami})
 		if err != nil {
 			log.Fatal().Err(err).Msg("unable to call claimlock")
@@ -52,13 +53,16 @@ func main() {
 
 	// Release the claimed lock
 	start := time.Now()
+
 	if _, err = lc.ReleaseLock(ctx, &pb.ReleaseRequest{Key: lock, Who: whoami}); err != nil {
 		log.Fatal().Err(err).Msg("unable to release lock")
 	}
+
 	log.Info().Str("lock", lock).Str("whoami", whoami).Str("took", time.Since(start).String()).Msg("released lock")
 
 	// Release the claimed lock again (failing on purpose)
 	start = time.Now()
+
 	if _, err = lc.ReleaseLock(ctx, &pb.ReleaseRequest{Key: lock, Who: whoami}); err != nil {
 		log.Info().Str("lock", lock).Str("whoami", whoami).
 			Str("took", time.Since(start).String()).Msg("lock already released")
@@ -69,6 +73,7 @@ func main() {
 	key := "conf"
 
 	start = time.Now()
+
 	_, err = lc.Put(ctx, &pb.PutRequest{
 		Buckets: buckets,
 		Value:   content,
@@ -77,11 +82,13 @@ func main() {
 	if err != nil {
 		log.Err(err).Msg("unable to put key")
 	}
+
 	log.Info().Strs("buckets", buckets).Str("key", key).
 		Str("value", string(content)).Str("took", time.Since(start).String()).
 		Msg("successful put")
 
 	start = time.Now()
+
 	out, err := lc.Get(ctx, &pb.GetRequest{Buckets: buckets, Key: key})
 	if err != nil {
 		log.Err(err).Msg("unable to retrieve key")
@@ -92,6 +99,7 @@ func main() {
 	}
 
 	start = time.Now()
+
 	_, err = lc.Delete(ctx, &pb.DeleteRequest{Buckets: buckets, Key: key})
 	if err != nil {
 		log.Err(err).Msg("unable to delete item")
@@ -102,6 +110,7 @@ func main() {
 	}
 
 	start = time.Now()
+
 	out, err = lc.Get(ctx, &pb.GetRequest{Buckets: buckets, Key: key})
 	if err != nil {
 		log.Info().Strs("buckets", buckets).Str("key", key).
@@ -110,6 +119,7 @@ func main() {
 	}
 
 	start = time.Now()
+
 	_, err = lc.Put(ctx, &pb.PutRequest{
 		// bucket/nested/firstbucket - firstkey: test
 		Buckets: []string{"bucket", "nested", "firstbucket"},
@@ -119,39 +129,43 @@ func main() {
 	if err != nil {
 		log.Err(err).Msg("unable to put key")
 	}
+
 	log.Info().Strs("buckets", buckets).Str("key", key).
 		Str("value", string(content)).Str("took", time.Since(start).String()).
 		Msg("successful put")
 
 	start = time.Now()
 	buckets = []string{"bucket", "nested", "secondbucket"}
-	_, err = lc.Put(ctx, &pb.PutRequest{
+
+	if _, err = lc.Put(ctx, &pb.PutRequest{
 		// bucket/nested/secondbucket - firstkey: test
 		Buckets: buckets,
 		Key:     "firstkey",
 		Value:   []byte("test"),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Err(err).Msg("unable to put key")
 	}
+
 	log.Info().Strs("buckets", buckets).Str("key", "firstkey").
 		Str("value", string(content)).Str("took", time.Since(start).String()).
 		Msg("successful put")
 
 	start = time.Now()
-	_, err = lc.Put(ctx, &pb.PutRequest{
+
+	if _, err = lc.Put(ctx, &pb.PutRequest{
 		Buckets: []string{"bucket", "nested"},
 		Value:   content,
 		Key:     "key",
-	})
-	if err != nil {
+	}); err != nil {
 		log.Err(err).Msg("unable to put key")
 	}
+
 	log.Info().Strs("buckets", buckets).Str("key", key).
 		Str("value", string(content)).Str("took", time.Since(start).String()).
 		Msg("successful put")
 
 	start = time.Now()
+
 	out, err = lc.Get(ctx, &pb.GetRequest{Buckets: []string{"bucket", "nested"}, Key: "key"})
 	if err != nil {
 		log.Err(err).Msg("unable to retrieve key")
@@ -160,5 +174,4 @@ func main() {
 			Str("value", string(out.Value)).
 			Str("took", time.Since(start).String()).Msg("successful get")
 	}
-
 }

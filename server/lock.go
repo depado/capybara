@@ -22,12 +22,14 @@ func (cap *CapybaraServer) ClaimLock(ctx context.Context, lr *pb.LockRequest) (*
 	if k == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "missing key argument")
 	}
+
 	who := lr.GetWho()
 	if who == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "missing who argument")
 	}
 
 	var ttl *time.Duration
+
 	pbttl := lr.TTL
 	if pbttl != nil {
 		d := pbttl.AsDuration()
@@ -37,7 +39,7 @@ func (cap *CapybaraServer) ClaimLock(ctx context.Context, lr *pb.LockRequest) (*
 	lock, ok, err := cap.db.ClaimLock(k, who, ttl)
 	if err != nil {
 		log.Err(err).Msg("unable to claim lock")
-		return nil, status.Errorf(codes.Internal, "an error occured")
+		return nil, status.Errorf(codes.Internal, "an error occurred")
 	}
 
 	resp := &pb.LockResponse{
@@ -50,6 +52,8 @@ func (cap *CapybaraServer) ClaimLock(ctx context.Context, lr *pb.LockRequest) (*
 	return resp, nil
 }
 
+// ReleaseLock is used to release a lock. This method will only work if the
+// client has ownership on the lock.
 func (cap *CapybaraServer) ReleaseLock(ctx context.Context, rr *pb.ReleaseRequest) (*pb.ReleaseResponse, error) {
 	log := cap.log.With().Str("function", "ReleaseLock").Logger()
 
@@ -57,6 +61,7 @@ func (cap *CapybaraServer) ReleaseLock(ctx context.Context, rr *pb.ReleaseReques
 	if k == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "missing key argument")
 	}
+
 	who := rr.GetWho()
 	if who == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "missing who argument")
@@ -79,5 +84,6 @@ func (cap *CapybaraServer) ReleaseLock(ctx context.Context, rr *pb.ReleaseReques
 	}
 
 	resp := &pb.ReleaseResponse{}
+
 	return resp, nil
 }

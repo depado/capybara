@@ -25,7 +25,7 @@ var certGenCmd = &cobra.Command{
 			l.Fatal().Err(err).Msg("unable to parse configuration")
 		}
 		l := NewLogger(conf)
-		if err := GenerateServerCertEd(conf, l); err != nil {
+		if err := GenerateServerCertEd(conf, l, true); err != nil {
 			l.Fatal().Err(err).Msg("unable to generate server cert")
 		}
 	},

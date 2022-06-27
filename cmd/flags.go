@@ -22,7 +22,7 @@ func addServerFlags(c *cobra.Command) {
 	c.PersistentFlags().String("server.tls.type", "server", `one of "disable", "server", "mtls"`)
 }
 
-// addDatabaseFlags will add the database related flags and conf
+// addDatabaseFlags will add the database related flags and conf.
 func addDatabaseFlags(c *cobra.Command) {
 	c.PersistentFlags().String("database.path", "capybara.db", "path to the database file to use")
 	c.PersistentFlags().Duration("database.default_lock_ttl", 5*time.Minute, "default time to live for locks")

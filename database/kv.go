@@ -35,6 +35,7 @@ func TraverseCreate(t *bolt.Tx, buckets []string) (*bolt.Bucket, error) {
 			return nil, err
 		}
 	}
+
 	return b, nil
 }
 
@@ -47,11 +48,13 @@ func Traverse(t *bolt.Tx, buckets []string) (*bolt.Bucket, error) {
 	if b == nil {
 		return nil, fmt.Errorf("bucket %s: %w", buckets[0], ErrBucketNotFound)
 	}
+
 	for _, bk := range buckets[1:] {
 		if b = b.Bucket([]byte(bk)); b == nil {
 			return nil, fmt.Errorf("bucket %s: %w", bk, ErrBucketNotFound)
 		}
 	}
+
 	return b, nil
 }
 
@@ -61,6 +64,7 @@ func Traverse(t *bolt.Tx, buckets []string) (*bolt.Bucket, error) {
 func (cdb *CapybaraDB) Put(buckets []string, key string, value []byte) error {
 	start := time.Now()
 	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "put").Send()
+
 	if len(buckets) == 0 {
 		return ErrNoBucket
 	}
@@ -88,13 +92,18 @@ func (cdb *CapybaraDB) PutPath(path, sep string, value []byte) error {
 	if len(o) < 2 {
 		return ErrNoBucket
 	}
+
 	buckets, key := o[:len(o)-1], o[len(o)-1]
+
 	return cdb.Put(buckets, key, value)
 }
 
+// Delete will attempt to delete the provided key in the given bucket path.
+// An error is returned if the operation can't complete.
 func (cdb *CapybaraDB) Delete(buckets []string, key string) error {
 	start := time.Now()
 	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "delete").Send()
+
 	if len(buckets) == 0 {
 		return ErrNoBucket
 	}
@@ -110,18 +119,23 @@ func (cdb *CapybaraDB) Delete(buckets []string, key string) error {
 	return err
 }
 
+// DeletePath will delete a key given a full path to the key and a separator.
 func (cdb *CapybaraDB) DeletePath(path, sep string) error {
 	o := strings.Split(path, sep)
 	if len(o) < 2 {
 		return ErrNoBucket
 	}
+
 	buckets, key := o[:len(o)-1], o[len(o)-1]
+
 	return cdb.Delete(buckets, key)
 }
 
+// Get returns the raw value of they key stored in the given bucket path.
 func (cdb *CapybaraDB) Get(buckets []string, key string) ([]byte, error) {
 	start := time.Now()
 	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "get").Send()
+
 	if len(buckets) == 0 {
 		return nil, ErrNoBucket
 	}
@@ -148,12 +162,14 @@ func (cdb *CapybaraDB) Get(buckets []string, key string) ([]byte, error) {
 	return out, err
 }
 
-// GetPath will return the path
+// GetPath will return the path.
 func (cdb *CapybaraDB) GetPath(path, sep string) ([]byte, error) {
 	o := strings.Split(path, sep)
 	if len(o) < 2 {
 		return nil, ErrNoBucket
 	}
+
 	buckets, key := o[:len(o)-1], o[len(o)-1]
+
 	return cdb.Get(buckets, key)
 }

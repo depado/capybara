@@ -1,30 +1,52 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"go.uber.org/fx"
 
 	"github.com/Depado/capybara/cmd"
 	"github.com/Depado/capybara/database"
 	"github.com/Depado/capybara/server"
 )
 
-// Main function that will be executed from the root command
+// Main function that will be executed from the root command.
 func run() {
-	fx.New(
-		fx.NopLogger,
-		fx.Provide(
-			cmd.NewConf, cmd.NewLogger,
-			database.NewCapybaraDB,
-			server.NewGRPCServer,
-		),
-		fx.Invoke(server.Listen),
-	).Run()
+	conf, err := cmd.NewConf()
+	if err != nil {
+		log.Fatal().Err(err).Msg("unable to load configuration")
+	}
+
+	lg := cmd.NewLogger(conf)
+
+	cdb, err := database.NewCapybaraDB(conf, lg)
+	if err != nil {
+		lg.Fatal().Err(err).Msg("unable to initialize database")
+	}
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		err := cdb.Close()
+		if err != nil {
+			lg.Error().Err(err).Msg("closing database")
+		}
+		os.Exit(1)
+	}()
+
+	gs, err := server.NewGRPCServer(conf, lg, cdb)
+	if err != nil {
+		lg.Fatal().Err(err).Msg("unable to initialize grpc server")
+	}
+	server.Listen(conf, lg, gs)
 }
 
 // Main command that will be run when no other command is provided on the
-// command-line
+// command-line.
 var rootCmd = &cobra.Command{
 	Use: "capybara",
 	Run: func(cmd *cobra.Command, args []string) { run() },

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Setup will setup the cobra command to bind flags and append subcommands.
 func Setup(com *cobra.Command) {
 	// Add and parse flags
 	addConfigurationFlag(com)
