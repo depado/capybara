@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"google.golang.org/grpc/credentials"
 )
@@ -13,7 +13,7 @@ import (
 // and verify its authenticity.
 func loadTLSCredentials(path string) (credentials.TransportCredentials, error) {
 	// Load the CA certificate that signed the server's cert
-	pemServerCA, err := ioutil.ReadFile(path)
+	pemServerCA, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("read file: %w", err)
 	}
