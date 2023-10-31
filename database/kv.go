@@ -63,7 +63,9 @@ func Traverse(t *bolt.Tx, buckets []string) (*bolt.Bucket, error) {
 // is provided or if the path is invalid.
 func (cdb *CapybaraDB) Put(buckets []string, key string, value []byte) error {
 	start := time.Now()
-	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "put").Send()
+	defer func() {
+		cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "put").Send()
+	}()
 
 	if len(buckets) == 0 {
 		return ErrNoBucket
@@ -102,7 +104,9 @@ func (cdb *CapybaraDB) PutPath(path, sep string, value []byte) error {
 // An error is returned if the operation can't complete.
 func (cdb *CapybaraDB) Delete(buckets []string, key string) error {
 	start := time.Now()
-	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "delete").Send()
+	defer func() {
+		cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "delete").Send()
+	}()
 
 	if len(buckets) == 0 {
 		return ErrNoBucket
@@ -134,7 +138,9 @@ func (cdb *CapybaraDB) DeletePath(path, sep string) error {
 // Get returns the raw value of they key stored in the given bucket path.
 func (cdb *CapybaraDB) Get(buckets []string, key string) ([]byte, error) {
 	start := time.Now()
-	defer cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "get").Send()
+	defer func() {
+		cdb.log.Debug().Str("took", time.Since(start).String()).Str("key", key).Str("action", "get").Send()
+	}()
 
 	if len(buckets) == 0 {
 		return nil, ErrNoBucket

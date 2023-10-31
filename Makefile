@@ -1,10 +1,9 @@
 .DEFAULT_GOAL := build
 
-export GO111MODULE=on
-export CGO_ENABLED=0
-export VERSION=$(shell git describe --abbrev=0 --tags 2> /dev/null || echo "0.1.0")
-export BUILD=$(shell git rev-parse HEAD 2> /dev/null || echo "undefined")
-export BUILDDATE=$(shell LANG=en_us_88591 date)
+CGO_ENABLED=0
+VERSION=$(shell git describe --abbrev=0 --tags 2> /dev/null || echo "0.1.0")
+BUILD=$(shell git rev-parse HEAD 2> /dev/null || echo "undefined")
+BUILDDATE=$(shell LANG=en_us_88591 date)
 BINARY=capybara
 LDFLAGS=-ldflags "-X main.Version=$(VERSION) -X main.Build=$(BUILD) -s -w"
 LDFLAGS=-ldflags "-X 'github.com/Depado/capybara/cmd.Version=$(VERSION)' \
@@ -21,11 +20,11 @@ help:
 
 .PHONY: build-noproto
 build-noproto: ## Build without regenerating the go grpc bindings
-	go build $(LDFLAGS) -o $(BINARY) 
+	go build $(LDFLAGS) -o $(BINARY)
 
 .PHONY: build
 build: proto ## Build
-	go build $(LDFLAGS) -o $(BINARY) 
+	go build $(LDFLAGS) -o $(BINARY)
 
 .PHONY: packed
 packed: proto ## Build a packed version
