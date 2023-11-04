@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/google/uuid v1.4.0
 	github.com/rs/zerolog v1.31.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.17.0
 	go.etcd.io/bbolt v1.3.8
 	google.golang.org/grpc v1.59.0
