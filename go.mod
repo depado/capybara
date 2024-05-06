@@ -1,13 +1,15 @@
 module github.com/Depado/capybara
 
-go 1.20
+go 1.21
+
+toolchain go1.22.2
 
 require (
 	github.com/google/uuid v1.6.0
 	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.18.2
-	go.etcd.io/bbolt v1.3.9
+	go.etcd.io/bbolt v1.3.10
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.34.0
 )
