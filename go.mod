@@ -2,7 +2,7 @@ module github.com/Depado/capybara
 
 go 1.21
 
-toolchain go1.22.5
+toolchain go1.22.6
 
 require (
 	github.com/google/uuid v1.6.0
