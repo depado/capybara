@@ -21,7 +21,7 @@ func (cap *CapybaraServer) Put(ctx context.Context, pr *pb.PutRequest) (*pb.PutR
 		return nil, status.Error(codes.InvalidArgument, "key can't be empty")
 	}
 
-	if pr.Value == nil || len(pr.Value) == 0 {
+	if len(pr.Value) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "value is nil or empty")
 	}
 

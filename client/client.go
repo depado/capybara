@@ -70,7 +70,7 @@ func NewClient(addr string, opts ClientOpts) (*Client, error) {
 		who = uuid.NewString()
 	}
 
-	conn, err := grpc.Dial(addr, grpc.WithTransportCredentials(creds))
+	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return nil, fmt.Errorf("dial: %w", err)
 	}
