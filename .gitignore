@@ -2,3 +2,4 @@ capybara
 *conf.yml
 *.db
 *.pem
+dist/

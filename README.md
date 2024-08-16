@@ -5,8 +5,6 @@
 
   ![Go Version](https://img.shields.io/badge/Go%20Version-latest-brightgreen.svg)
   [![Go Report Card](https://goreportcard.com/badge/github.com/Depado/quokka)](https://goreportcard.com/report/github.com/Depado/capybara)
-  [![Build Status](https://drone.depa.do/api/badges/Depado/capybara/status.svg)](https://drone.depa.do/Depado/capybara)
-  [![codecov](https://codecov.io/gh/Depado/capybara/branch/master/graph/badge.svg)](https://codecov.io/gh/Depado/capybara)
   [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Depado/capybara/blob/master/LICENSE)
   [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/Depado)
 </h2>
