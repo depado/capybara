@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/Depado/capybara/cmd"
-	"github.com/Depado/capybara/database"
-	"github.com/Depado/capybara/pb"
+	"github.com/depado/capybara/cmd"
+	"github.com/depado/capybara/database"
+	"github.com/depado/capybara/pb"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

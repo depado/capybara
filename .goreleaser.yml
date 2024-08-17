@@ -12,9 +12,9 @@ builds:
       - CGO_ENABLED=0
     ldflags:
       - -s -w
-      - -X 'github.com/Depado/capybara/cmd.Version={{ .Version }}'
-      - -X 'github.com/Depado/capybara/cmd.Build={{ .Commit }}'
-      - -X 'github.com/Depado/capybara/cmd.Time={{ .Date }}'
+      - -X 'github.com/depado/capybara/cmd.Version={{ .Version }}'
+      - -X 'github.com/depado/capybara/cmd.Build={{ .Commit }}'
+      - -X 'github.com/depado/capybara/cmd.Time={{ .Date }}'
 
 archives:
   - format: tar.gz

@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/Depado/capybara/pb"
+	"github.com/depado/capybara/pb"
 )
 
 // ErrNotOwner is the error returned when ownership of the lock doesn't match.

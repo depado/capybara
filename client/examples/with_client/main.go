@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	capybara "github.com/Depado/capybara/client"
+	capybara "github.com/depado/capybara/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/Depado/capybara/pb"
+	"github.com/depado/capybara/pb"
 )
 
 func main() {

@@ -5,7 +5,7 @@ FROM golang:1.23-alpine AS builder
 RUN apk update && apk add --no-cache upx make git
 
 # Source
-WORKDIR $GOPATH/src/github.com/Depado/capybara
+WORKDIR $GOPATH/src/github.com/depado/capybara
 COPY go.mod go.sum ./
 RUN go mod download
 RUN go mod verify

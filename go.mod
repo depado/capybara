@@ -1,4 +1,4 @@
-module github.com/Depado/capybara
+module github.com/depado/capybara
 
 go 1.23
 

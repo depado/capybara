@@ -8,9 +8,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/Depado/capybara/cmd"
-	"github.com/Depado/capybara/database"
-	"github.com/Depado/capybara/server"
+	"github.com/depado/capybara/cmd"
+	"github.com/depado/capybara/database"
+	"github.com/depado/capybara/server"
 )
 
 // Main function that will be executed from the root command.

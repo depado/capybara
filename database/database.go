@@ -9,7 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	bolt "go.etcd.io/bbolt"
 
-	"github.com/Depado/capybara/cmd"
+	"github.com/depado/capybara/cmd"
 )
 
 const (

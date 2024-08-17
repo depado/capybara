@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Depado/capybara/database"
-	"github.com/Depado/capybara/pb"
+	"github.com/depado/capybara/database"
+	"github.com/depado/capybara/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
