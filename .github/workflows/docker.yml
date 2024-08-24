@@ -15,6 +15,14 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dockerfile: ./Dockerfile
+            suffix: ""
+          - dockerfile: ./Dockerfile.pack
+            suffix: "-packed"
 
     steps:
       - name: Checkout repository
@@ -36,12 +44,16 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=ref,event=branch
-            type=sha 
+            type=sha
+          flavor: |
+            latest=auto
+            suffix=${{ matrix.suffix }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
