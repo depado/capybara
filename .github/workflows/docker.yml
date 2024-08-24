@@ -21,8 +21,10 @@ jobs:
         include:
           - dockerfile: ./Dockerfile
             suffix: ""
+            latest: auto
           - dockerfile: ./Dockerfile.pack
             suffix: "-packed"
+            latest: false
 
     steps:
       - name: Checkout repository
@@ -46,7 +48,7 @@ jobs:
             type=ref,event=branch
             type=sha
           flavor: |
-            latest=auto
+            latest=${{ matrix.latest }}
             suffix=${{ matrix.suffix }}
 
       - name: Build and push Docker image
