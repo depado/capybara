@@ -1,5 +1,5 @@
 # Build Step
-FROM golang:1.24.0-alpine@sha256:5429efb7de864db15bd99b91b67608d52f97945837c7f6f7d1b779f9bfe46281 as builder
+FROM golang:1.24.0-alpine@sha256:beded3aa2b820de62cd378834292360140504b2a12c9544d4f2b7523237a8b8d as builder
 
 # Dependencies
 RUN apk update && apk add --no-cache make git
