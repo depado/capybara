@@ -7,6 +7,7 @@ import (
 	"time"
 
 	bolt "go.etcd.io/bbolt"
+	bolterrors "go.etcd.io/bbolt/errors"
 )
 
 var (
@@ -79,7 +80,7 @@ func (cdb *CapybaraDB) Put(buckets []string, key string, value []byte) error {
 		return b.Put([]byte(key), value)
 	})
 
-	if errors.Is(err, bolt.ErrIncompatibleValue) {
+	if errors.Is(err, bolterrors.ErrIncompatibleValue) {
 		return ErrIncompatibleValue
 	}
 
