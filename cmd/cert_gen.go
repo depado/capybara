@@ -83,7 +83,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger, local bool) error {
 	if err != nil {
 		return fmt.Errorf("create file: %s: %w", caCertPath, err)
 	}
-	defer fdca.Close()
+	defer fdca.Close() //nolint:errcheck
 
 	if err = pem.Encode(fdca, &pem.Block{
 		Type:  "CERTIFICATE",
@@ -99,7 +99,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger, local bool) error {
 	if err != nil {
 		return fmt.Errorf("create file: %s: %w", caKeyPath, err)
 	}
-	defer fdk.Close()
+	defer fdk.Close() //nolint:errcheck
 
 	b, err := x509.MarshalPKCS8PrivateKey(caPriv)
 	if err != nil {
@@ -175,7 +175,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger, local bool) error {
 	if err != nil {
 		return fmt.Errorf("create file: %s: %w", c.Server.TLS.CertPath, err)
 	}
-	defer fdcrt.Close()
+	defer fdcrt.Close() //nolint:errcheck
 
 	err = pem.Encode(fdcrt, &pem.Block{Type: "CERTIFICATE", Bytes: clientCRTRaw})
 	if err != nil {
@@ -189,7 +189,7 @@ func GenerateServerCertEd(c *Conf, log zerolog.Logger, local bool) error {
 	if err != nil {
 		return fmt.Errorf("create file: %s: %w", c.Server.TLS.KeyPath, err)
 	}
-	defer fdks.Close()
+	defer fdks.Close() //nolint:errcheck
 
 	b, err = x509.MarshalPKCS8PrivateKey(servPriv)
 	if err != nil {

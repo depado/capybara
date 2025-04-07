@@ -20,11 +20,11 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	// Connect to capybara server
-	conn, err := grpc.Dial("127.0.0.1:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("127.0.0.1:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal().Err(err).Msg("unable to open grpc connection")
 	}
-	defer conn.Close()
+	defer conn.Close() //nolint:errcheck
 
 	// Initialize capybara client and set context with a valid token
 	lc := pb.NewCapybaraClient(conn)
