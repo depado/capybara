@@ -40,7 +40,7 @@ jobs:
     with:
       dockerfile: "./Dockerfile.pack"
       tag-suffix: "-packed"
-      enable-latest-tag: false
+      tag-latest: false
     secrets:
       cleanup-token: ${{ secrets.PAT_DELETE_PACKAGES }}
 
