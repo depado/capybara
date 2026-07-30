@@ -26,8 +26,8 @@ jobs:
       packages: write
       actions: read
     uses: depado/github-actions/.github/workflows/docker.yml@main
-    secrets:
-      cleanup-token: ${{ secrets.PAT_DELETE_PACKAGES }}
+    with:
+      enable-cleanup: false
 
   docker-packed:
     name: Docker Packed
@@ -41,6 +41,12 @@ jobs:
       dockerfile: "./Dockerfile.pack"
       tag-suffix: "-packed"
       tag-latest: false
-    secrets:
-      cleanup-token: ${{ secrets.PAT_DELETE_PACKAGES }}
+      enable-cleanup: false
 
+  container-retention-policy:
+    name: Container Retention Policy
+    if: github.event_name != 'pull_request'
+    needs: [docker, docker-packed]
+    permissions:
+      packages: write
+    uses: depado/github-actions/.github/workflows/container-retention-policy.yml@main
