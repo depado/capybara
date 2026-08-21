@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 
-CGO_ENABLED=0
+export CGO_ENABLED=0
 VERSION=$(shell git describe --abbrev=0 --tags 2> /dev/null || echo "0.1.0")
 BUILD=$(shell git rev-parse HEAD 2> /dev/null || echo "undefined")
 BUILDDATE=$(shell LANG=en_us_88591 date)
